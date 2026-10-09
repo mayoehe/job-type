@@ -62,7 +62,7 @@ export function MessageResult({ result }: { result: ScanResultFull }) {
       {sa?.recommendedResponse && (
         <>
           <h3 style={{ marginTop: 12 }}>Recommended response</h3>
-          <div className="finding" style={{ borderLeftColor: '#a78bfa' }}><div>{sa.recommendedResponse}</div></div>
+          <div className="finding" style={{ borderLeftColor: '#bef264' }}><div>{sa.recommendedResponse}</div></div>
         </>
       )}
       <h3 style={{ marginTop: 12 }}>Next steps</h3>
@@ -72,7 +72,7 @@ export function MessageResult({ result }: { result: ScanResultFull }) {
         <EmptyState title="No significant flags" body="Stay cautious and verify the sender through official channels." />
       )}
       {result.allFindings.filter((f) => f.severity !== 'info').map((f) => (
-        <div className="finding" key={f.id} style={{ borderLeftColor: f.severity === 'critical' ? '#ef4444' : f.severity === 'high' ? '#f97316' : '#f59e0b' }}>
+        <div className="finding" key={f.id} style={{ borderLeftColor: f.severity === 'critical' ? '#ef4444' : f.severity === 'high' ? '#f87171' : '#fb923c' }}>
           <FindingSeverity severity={f.severity} /> <b>{f.title}</b>
           <div className="ev">{f.evidence}</div>
         </div>

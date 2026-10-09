@@ -64,8 +64,8 @@ npm run dev         # http://localhost:5173 (proxies /api → backend)
 
 ## Interface (v1.2 redesign)
 
-Dark premium dashboard (`#08080B` canvas, charcoal cards, purple identity
-accents; semantic green→red risk colours). Destinations: **Dashboard** (live
+Dark analytics dashboard (`#060607` canvas, charcoal cards, lime/orange data
+accents, slim icon rail; semantic lime→orange→red risk colours). Destinations: **Dashboard** (live
 stats, risk distribution, 14-day activity, recent scans — all computed from
 real local history, with empty states when none), **Scan Job** (listing +
 message tabs), **Scan History** (search, risk filters, re-open past evidence,

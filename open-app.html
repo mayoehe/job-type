@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobShield — Launcher</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif; color: #f2f6ff; padding: 24px;
+      background:
+        radial-gradient(1100px 520px at 85% -5%, rgba(139, 92, 246, 0.22), transparent 60%),
+        radial-gradient(900px 520px at -10% 0%, rgba(167, 139, 250, 0.12), transparent 55%),
+        #08080B;
+    }
+    .card {
+      width: min(600px, 94vw); background: #101014; border: 1px solid #26262e;
+      border-radius: 16px; padding: 28px; box-shadow: 0 12px 32px rgba(0,0,0,.55);
+    }
+    h1 { margin: 0 0 4px; font-size: 24px; }
+    h1 span { color: #8b5cf6; }
+    p.sub { margin: 0 0 20px; color: #8ea0bd; font-size: 14px; }
+    .row {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      border: 1px solid #26262e; border-radius: 10px; margin-bottom: 10px; font-size: 15px;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; background: #5b6b82; flex: none; }
+    .dot.up { background: #34d399; box-shadow: 0 0 10px #34d399; }
+    .dot.down { background: #f87171; box-shadow: 0 0 10px #f87171; }
+    .row small { margin-left: auto; color: #8ea0bd; font-family: Consolas, monospace; }
+    .btn {
+      display: block; width: 100%; border: none; cursor: pointer; text-align: center;
+      text-decoration: none; font-weight: 700; font-size: 16px; color: #fff;
+      padding: 14px 20px; border-radius: 12px; margin-top: 14px;
+      background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 55%, #c4b5fd 130%);
+    }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn.ghost { background: #16161c; border: 1.5px solid #26262e; font-size: 14px; padding: 10px; }
+    details { margin-top: 16px; font-size: 14px; color: #8ea0bd; }
+    summary { cursor: pointer; color: #c4b5fd; font-weight: 700; }
+    pre {
+      background: #0a0a0e; border: 1px solid #26262e; border-radius: 10px;
+      padding: 12px; overflow-x: auto; color: #dbe7ff; font-size: 12.5px; line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🛡️ Job<span>Shield</span> Launcher</h1>
+    <p class="sub">Double-click this file any time to check the servers and open the app.</p>
+
+    <div class="row"><span class="dot" id="dot-app"></span>App (UI + API, single port) <small>localhost:8787</small></div>
+    <div class="row"><span class="dot" id="dot-back"></span>Backend API <small>localhost:8787/api/health</small></div>
+    <div class="row"><span class="dot" id="dot-dev"></span>Frontend dev (optional) <small>localhost:5173</small></div>
+
+    <button class="btn" id="open" disabled>Checking servers…</button>
+    <button class="btn ghost" id="recheck">↻ Recheck status</button>
+
+    <details id="help">
+      <summary>Servers are down? Start them ⬇</summary>
+      <p><b>Option A — single server (recommended):</b> serves the built UI + API on one port. Keep <b>one</b> terminal open, then press Recheck.</p>
+      <pre>cd /d "%USERPROFILE%\OneDrive\Documents\GitHub\job-type\backend"
+npm install
+npm start</pre>
+      <p>Then open <b>http://localhost:8787</b></p>
+      <p><b>Option B — dev mode (two terminals):</b> live-reload frontend + backend separately.</p>
+      <p><b>1 — Backend:</b></p>
+      <pre>cd /d "%USERPROFILE%\OneDrive\Documents\GitHub\job-type\backend"
+npm install
+npm start</pre>
+      <p><b>2 — Frontend:</b></p>
+      <pre>cd /d "%USERPROFILE%\OneDrive\Documents\GitHub\job-type\frontend"
+npm install
+npm run dev</pre>
+      <p>Then open <b>http://localhost:5173</b> (proxies /api → backend).</p>
+      <p>If the single-port UI looks stale, rebuild it: <b>cd frontend</b>, <b>npm run build</b>, restart the backend.</p>
+      <p>No login needed. Paste a job listing or recruiter message to scan. Reporting fraud: <b>https://cybercrime.gov.in</b> / <b>1930</b>.</p>
+    </details>
+  </div>
+
+  <script>
+    const APP = 'http://localhost:8787';
+    const API = 'http://localhost:8787/api/health';
+    const DEV = 'http://localhost:5173';
+    const openBtn = document.getElementById('open');
+    let target = APP;
+
+    // no-cors: we can't read the response (CORS), but a resolved
+    // promise still proves the server is listening.
+    async function ping(url, ms = 2500) {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), ms);
+      try {
+        await fetch(url, { mode: 'no-cors', signal: ctrl.signal });
+        return true;
+      } catch { return false; }
+      finally { clearTimeout(t); }
+    }
+
+    async function check() {
+      openBtn.disabled = true;
+      openBtn.textContent = 'Checking servers…';
+      const [app, back, dev] = await Promise.all([ping(APP), ping(API), ping(DEV)]);
+      document.getElementById('dot-app').className = 'dot ' + (app ? 'up' : 'down');
+      document.getElementById('dot-back').className = 'dot ' + (back ? 'up' : 'down');
+      document.getElementById('dot-dev').className = 'dot ' + (dev ? 'up' : 'down');
+      // Single-port 8787 covers UI + API. Dev mode needs 5173 + API together.
+      if (app && back) {
+        target = APP;
+        openBtn.disabled = false;
+        openBtn.textContent = '🚀 Open JobShield';
+        document.getElementById('help').open = false;
+      } else if (dev && back) {
+        target = DEV;
+        openBtn.disabled = false;
+        openBtn.textContent = '🚀 Open JobShield (dev)';
+        document.getElementById('help').open = false;
+      } else {
+        openBtn.textContent = 'Servers offline — see steps below';
+        document.getElementById('help').open = true;
+      }
+    }
+
+    openBtn.addEventListener('click', () => window.open(target, '_blank'));
+    document.getElementById('recheck').addEventListener('click', check);
+    check();
+    setInterval(check, 10000);
+  </script>
+</body>
+</html>

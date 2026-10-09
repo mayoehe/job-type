@@ -70,7 +70,7 @@ export default function Settings() {
             <button className="btn ghost sm" onClick={() => { clearHistory(); setHistCount(0); }}><Trash2 size={14} /> Delete all local history</button>
           </div>
           <label className="note" style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12, cursor: 'pointer' }}>
-            <input type="checkbox" checked={reduceMotion} onChange={toggleMotion} style={{ width: 17, height: 17, accentColor: '#8b5cf6' }} />
+            <input type="checkbox" checked={reduceMotion} onChange={toggleMotion} style={{ width: 17, height: 17, accentColor: '#bef264' }} />
             Reduce motion (also follows your OS setting automatically)
           </label>
           <p className="note" style={{ marginTop: 12, display: 'flex', gap: 6 }}><Info size={14} style={{ flexShrink: 0, marginTop: 2 }} /> The backend keeps only anonymous aggregate counts. Full scan evidence lives in your browser history until you delete it.</p>

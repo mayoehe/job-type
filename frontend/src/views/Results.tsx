@@ -4,11 +4,11 @@ import { Card, RiskBadge, ScoreRing, StateDot, VerifyChip, FindingSeverity, Empt
 import type { ScanResultFull, SafeApply } from '../lib/api';
 
 const CATS = [
-  { key: 'linguistic', label: 'Linguistic', max: 35, color: '#a78bfa' },
-  { key: 'behavioural', label: 'Behavioural', max: 30, color: '#8b5cf6' },
-  { key: 'domain', label: 'URL & domain', max: 15, color: '#c4b5fd' },
-  { key: 'technical', label: 'Technical', max: 10, color: '#6d6d78' },
-  { key: 'employer', label: 'Employer', max: 10, color: '#6d6d78' },
+  { key: 'linguistic', label: 'Linguistic', max: 35, color: '#bef264' },
+  { key: 'behavioural', label: 'Behavioural', max: 30, color: '#fb923c' },
+  { key: 'domain', label: 'URL & domain', max: 15, color: '#a1a1aa' },
+  { key: 'technical', label: 'Technical', max: 10, color: '#71717a' },
+  { key: 'employer', label: 'Employer', max: 10, color: '#52525b' },
 ];
 
 export default function Results({ result, source, text }: { result: ScanResultFull; source: string | null; text: string }) {
@@ -92,7 +92,8 @@ export function SafeApplyOnly({ result, text }: { result: ScanResultFull; text: 
 
 export function SafeApply({ sa, text, reviewed, toggle, selHi, setSelHi, showShared, setShowShared }:
   { sa: SafeApply; text: string; reviewed: Set<string>; toggle: (id: string) => void; selHi: number | null; setSelHi: (i: number | null) => void; showShared: boolean; setShowShared: (b: boolean) => void }) {
-  const vColor = sa.verdict === 'avoid' ? '#ef4444' : sa.verdict === 'verify' ? '#f59e0b' : '#22c55e';
+  const vColor = sa.verdict === 'avoid' ? '#ef4444' : sa.verdict === 'verify' ? '#fb923c' : '#bef264';
+  const vInk = sa.verdict === 'avoid' ? '#ffffff' : '#141a05';
   const cl = sa.checklist;
   const done = cl.items.filter((i) => i.state === 'passed').length + [...reviewed].filter((id) => cl.items.some((i) => i.id === id && i.state !== 'passed')).length;
   return (
@@ -100,7 +101,7 @@ export function SafeApply({ sa, text, reviewed, toggle, selHi, setSelHi, showSha
       <Card style={{ marginTop: 16, borderColor: vColor }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <h2>Safe Apply</h2>
-          <span className="badge" style={{ background: vColor }}>
+          <span className="badge" style={{ background: vColor, color: vInk }}>
             {sa.verdict === 'avoid' ? <ShieldCheck size={14} /> : <TriangleAlert size={14} />} {sa.verdictLabel}
           </span>
         </div>
@@ -119,8 +120,8 @@ export function SafeApply({ sa, text, reviewed, toggle, selHi, setSelHi, showSha
         {showShared && (
           <div className="grid two" style={{ marginTop: 10 }}>
             <div className="finding" style={{ borderLeftColor: '#ef4444' }}><b>Money / credentials exposed</b><div className="note">{sa.alreadyShared.money}</div></div>
-            <div className="finding" style={{ borderLeftColor: '#f59e0b' }}><b>Identity documents shared</b><div className="note">{sa.alreadyShared.identity}</div></div>
-            <div className="finding" style={{ borderLeftColor: '#a78bfa', gridColumn: '1 / -1' }}><b>Report fraud</b><div className="note">{sa.alreadyShared.report}</div></div>
+            <div className="finding" style={{ borderLeftColor: '#fb923c' }}><b>Identity documents shared</b><div className="note">{sa.alreadyShared.identity}</div></div>
+            <div className="finding" style={{ borderLeftColor: '#bef264', gridColumn: '1 / -1' }}><b>Report fraud</b><div className="note">{sa.alreadyShared.report}</div></div>
           </div>
         )}
       </Card>
@@ -139,7 +140,7 @@ export function SafeApply({ sa, text, reviewed, toggle, selHi, setSelHi, showSha
                   <dt>Listing domain</dt><dd>{sa.verification.listingDomain || '— (no URL)'}</dd>
                 </dl>
                 {sa.verification.checks.map((c) => (
-                  <div className="finding" key={c.id} style={{ borderLeftColor: c.status === 'verified' ? '#22c55e' : c.status === 'mismatch' ? '#ef4444' : '#64748b' }}>
+                  <div className="finding" key={c.id} style={{ borderLeftColor: c.status === 'verified' ? '#bef264' : c.status === 'mismatch' ? '#ef4444' : '#8b919d' }}>
                     <b>{c.label}</b> <VerifyChip status={c.status} />
                     <div className="note">{c.evidence}</div>
                     <small className="note">Source: {c.source}</small>
@@ -152,7 +153,7 @@ export function SafeApply({ sa, text, reviewed, toggle, selHi, setSelHi, showSha
             <h2><Fingerprint size={16} style={{ verticalAlign: -3 }} /> Information protection</h2>
             {sa.protection.length === 0 && <p className="note" style={{ marginTop: 8 }}>Offline estimate — protection detail needs the backend.</p>}
             {sa.protection.map((g) => (
-              <div className="finding" key={g.id} style={{ borderLeftColor: g.status === 'requested' ? '#ef4444' : g.status === 'mentioned' ? '#f59e0b' : '#64748b' }}>
+              <div className="finding" key={g.id} style={{ borderLeftColor: g.status === 'requested' ? '#ef4444' : g.status === 'mentioned' ? '#fb923c' : '#8b919d' }}>
                 <b>{g.label}</b> <span className="tag">{g.status.replace(/-/g, ' ').toUpperCase()}</span>
                 <div className="note">{g.risk}</div>
                 {g.findings.map((f) => <small key={f.id} className="note" style={{ display: 'block' }}>[{f.severity.toUpperCase()}] {f.title}</small>)}
@@ -169,7 +170,7 @@ export function SafeApply({ sa, text, reviewed, toggle, selHi, setSelHi, showSha
               <>
                 <div style={{ marginTop: 8 }}><Highlighter text={text} highlights={sa.highlights} sel={selHi} onSelect={setSelHi} /></div>
                 {selHi !== null && sa.highlights[selHi] && (
-                  <div className="finding" style={{ borderLeftColor: sa.highlights[selHi].severity === 'critical' ? '#ef4444' : sa.highlights[selHi].severity === 'high' ? '#f97316' : '#f59e0b' }}>
+                  <div className="finding" style={{ borderLeftColor: sa.highlights[selHi].severity === 'critical' ? '#ef4444' : sa.highlights[selHi].severity === 'high' ? '#f87171' : '#fb923c' }}>
                     <FindingSeverity severity={sa.highlights[selHi].severity} /> <b>{sa.highlights[selHi].title}</b> <small className="note">{sa.highlights[selHi].category}</small>
                     <div className="ev">{sa.highlights[selHi].quote}</div>
                     <p className="note"><b>Why it matters:</b> {sa.highlights[selHi].why}</p>
@@ -185,14 +186,14 @@ export function SafeApply({ sa, text, reviewed, toggle, selHi, setSelHi, showSha
             <div className="progress" role="progressbar" aria-valuenow={done} aria-valuemax={cl.total} aria-label="Checklist progress"><div style={{ width: `${(done / cl.total) * 100}%` }} /></div>
             <p className="note">{done}/{cl.total} complete · {cl.counts.passed} passed · {cl.counts.failed} failed · {cl.counts.unverified} unverified · {reviewed.size} reviewed by you</p>
             {cl.items.map((c) => (
-              <div className="finding" key={c.id} style={{ borderLeftColor: c.state === 'passed' ? '#22c55e' : c.state === 'failed' ? '#ef4444' : '#64748b' }}>
+              <div className="finding" key={c.id} style={{ borderLeftColor: c.state === 'passed' ? '#bef264' : c.state === 'failed' ? '#ef4444' : '#8b919d' }}>
                 <div className="check">
                   <div style={{ flex: 1 }}>
                     <b>{c.label}</b>
                     <div style={{ display: 'flex', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
                       <StateDot state={c.state} />
                       <span className="tag">auto</span>
-                      {reviewed.has(c.id) && <span className="tag" style={{ color: '#a78bfa', borderColor: '#8b5cf666' }}>reviewed by you</span>}
+                      {reviewed.has(c.id) && <span className="tag" style={{ color: 'var(--ok)', borderColor: 'color-mix(in srgb, var(--ok) 40%, transparent)' }}>reviewed by you</span>}
                     </div>
                     <div className="note" style={{ marginTop: 4 }}>{c.detail}</div>
                     <label className="note" style={{ display: 'flex', gap: 7, marginTop: 8, cursor: 'pointer', alignItems: 'center' }}>
@@ -210,7 +211,7 @@ export function SafeApply({ sa, text, reviewed, toggle, selHi, setSelHi, showSha
 }
 
 function Highlighter({ text, highlights, sel, onSelect }: { text: string; highlights: SafeApply['highlights']; sel: number | null; onSelect: (i: number | null) => void }) {
-  const colors: Record<string, string> = { critical: '#ef4444', high: '#f97316', medium: '#f59e0b' };
+  const colors: Record<string, string> = { critical: '#ef4444', high: '#f87171', medium: '#fb923c' };
   const spans = [...highlights].map((h, i) => ({ ...h, i })).sort((a, b) => a.start - b.start);
   const parts: React.ReactNode[] = [];
   let pos = 0;

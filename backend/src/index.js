@@ -1,5 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { runScan, SCORING_DOC } from './scoring.js';
 import { inspectUrl } from './inspect.js';
 import { verifyEmployer } from './verify.js';
@@ -119,7 +122,29 @@ app.post('/api/message', async (req, res) => {
 
 app.get('/api/stats', (_req, res) => res.json({ ...stats, note: 'Anonymised aggregate counts only. No scanned content is retained.' }));
 
+// Serve the built frontend (frontend/dist) from the same origin so a
+// single `node src/index.js` runs the whole app. API routes above take
+// precedence; unknown /api paths return JSON 404; everything else falls
+// back to index.html for the SPA.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const FRONTEND_DIST = path.resolve(__dirname, '../../frontend/dist');
+if (fs.existsSync(path.join(FRONTEND_DIST, 'index.html'))) {
+  app.use(express.static(FRONTEND_DIST));
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not found' });
+    res.sendFile(path.join(FRONTEND_DIST, 'index.html'));
+  });
+} else {
+  console.warn('[jobshield] frontend/dist not found — API-only mode. Run `npm run build` in frontend/.');
+}
+
 // Exported for integration tests; only listens when run directly.
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/').split('/').pop())) {
-  app.listen(PORT, () => console.log(`[jobshield] backend listening on http://localhost:${PORT}`));
+  app.listen(PORT, () => {
+    console.log(`[jobshield] app running on http://localhost:${PORT} (API + UI on one port)`);
+    if (fs.existsSync(path.join(FRONTEND_DIST, 'index.html'))) {
+      console.log(`[jobshield] serving UI from ${FRONTEND_DIST}`);
+    }
+  });
 }

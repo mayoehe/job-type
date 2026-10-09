@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, ScanLine, History as HistoryIcon, ShieldCheck,
   FileBarChart, Settings as SettingsIcon, CircleHelp, Shield,
 } from 'lucide-react';
+import SquishSwitch from './components/SquishSwitch';
 import { localScan } from './lib/engine';
 import { SAMPLES, scanViaBackend, scanMessageBackend, localSafeApply, type ScanResultFull } from './lib/api';
 import { saveScan } from './lib/history';
@@ -47,6 +48,16 @@ export default function App() {
   const [historyKey, setHistoryKey] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [toast, setToast] = useState('');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      return localStorage.getItem('jobshield.theme') === 'light' ? 'light' : 'dark';
+    } catch { return 'dark'; }
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem('jobshield.theme', theme); } catch { /* noop */ }
+  }, [theme]);
 
   function notify(msg: string) {
     setToast(msg);
@@ -119,12 +130,12 @@ export default function App() {
           <div><b>JobShield</b><small>scam intelligence</small></div>
         </div>
         {NAV.map((n) => (
-          <button key={n.id} className={view === n.id ? 'nav-item active' : 'nav-item'} onClick={() => go(n.id)} aria-current={view === n.id ? 'page' : undefined}>
-            {n.icon} {n.label}
+          <button key={n.id} className={view === n.id ? 'nav-item active' : 'nav-item'} onClick={() => go(n.id)} aria-current={view === n.id ? 'page' : undefined} aria-label={n.label} title={n.label}>
+            {n.icon}<span className="nav-label" aria-hidden="true">{n.label}</span>
           </button>
         ))}
         <div className="side-foot">
-          <button className="nav-item" onClick={() => setHelpOpen(true)}><CircleHelp size={18} /> Help</button>
+          <button className="nav-item" onClick={() => setHelpOpen(true)} aria-label="Help" title="Help"><CircleHelp size={18} /><span className="nav-label" aria-hidden="true">Help</span></button>
         </div>
       </aside>
 
@@ -132,6 +143,17 @@ export default function App() {
         <div className="topbar">
           <span className="crumb">{CRUMBS[view]}</span>
           <span className="spacer" />
+          <span className="theme-toggle" title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+            <span className="theme-label" aria-hidden="true">{theme === 'light' ? 'Light' : 'Dark'}</span>
+            <SquishSwitch
+              checked={theme === 'light'}
+              onChange={(next) => setTheme(next ? 'light' : 'dark')}
+              ariaLabel={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              width={64}
+              height={32}
+              radius={16}
+            />
+          </span>
           <button className="btn sm primary" onClick={() => { go('scan'); setScanTab('listing'); }}><ScanLine size={14} /> New scan</button>
         </div>
         <div className="content">

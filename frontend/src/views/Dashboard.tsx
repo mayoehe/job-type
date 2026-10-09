@@ -2,7 +2,7 @@ import { ScanLine, ShieldX, AlertOctagon, UserSearch, ArrowRight, Activity, PieC
 import { Card, RiskBadge } from '../components/ui';
 import { historyStats, listScans, type HistoryEntry } from '../lib/history';
 
-const levelColor: Record<string, string> = { low: '#22c55e', caution: '#eab308', suspicious: '#f59e0b', high: '#f97316', critical: '#ef4444' };
+const levelColor: Record<string, string> = { low: '#bef264', caution: '#fbbf24', suspicious: '#fb923c', high: '#ef4444', critical: '#dc2626' };
 
 export default function Dashboard({ onScan, onOpen }: { onScan: () => void; onOpen: (id: string) => void }) {
   const stats = historyStats();
@@ -23,10 +23,10 @@ export default function Dashboard({ onScan, onOpen }: { onScan: () => void; onOp
       </div>
 
       <div className="grid four">
-        <Card><Stat icon={<Activity size={20} />} value={stats.total} label="Jobs scanned" sub="this device" /></Card>
-        <Card><Stat icon={<ShieldX size={20} />} value={stats.highRisk} label="High-risk listings" sub="high + critical" /></Card>
-        <Card><Stat icon={<AlertOctagon size={20} />} value={stats.critical} label="Critical warnings" sub="immediate danger" /></Card>
-        <Card><Stat icon={<UserSearch size={20} />} value={stats.needVerify} label="Need verification" sub="verify employer" /></Card>
+        <Card><Stat icon={<Activity size={20} />} tone="lime" value={stats.total} label="Jobs scanned" sub="this device" /></Card>
+        <Card><Stat icon={<ShieldX size={20} />} tone="red" value={stats.highRisk} label="High-risk listings" sub="high + critical" /></Card>
+        <Card><Stat icon={<AlertOctagon size={20} />} tone="red" value={stats.critical} label="Critical warnings" sub="immediate danger" /></Card>
+        <Card><Stat icon={<UserSearch size={20} />} tone="orange" value={stats.needVerify} label="Need verification" sub="verify employer" /></Card>
       </div>
 
       <div className="grid two" style={{ marginTop: 16 }}>
@@ -53,13 +53,13 @@ export default function Dashboard({ onScan, onOpen }: { onScan: () => void; onOp
           {stats.total === 0 ? (
             <p className="note" style={{ marginTop: 12 }}>Nothing to show yet.</p>
           ) : (
-            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 120, marginTop: 14 }} role="img" aria-label="Scan activity chart">
+            <div className="activity" style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 120, marginTop: 14 }} role="img" aria-label="Scan activity chart">
               {stats.last14.map((d) => (
                 <div key={d.day} title={`${d.day}: ${d.count} scan(s)`} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, minWidth: 0 }}>
                   <div style={{ width: '100%', height: 88, display: 'flex', alignItems: 'flex-end' }}>
-                    <div style={{ width: '100%', height: `${Math.max(d.count > 0 ? 8 : 2, (d.count / maxDay) * 88)}px`, borderRadius: 5, background: d.count > 0 ? 'linear-gradient(180deg,#8b5cf6,#6d28d9)' : '#25242d' }} />
+                    <div style={{ width: '100%', height: `${Math.max(d.count > 0 ? 10 : 3, (d.count / maxDay) * 88)}px`, borderRadius: 999, background: d.count > 0 ? 'linear-gradient(180deg,#d4f88a,#a3e635)' : '#2a2a30' }} />
                   </div>
-                  <small style={{ fontSize: 9.5, color: '#a1a1aa' }}>{d.day.slice(3)}</small>
+                  <small style={{ fontSize: 10, color: 'var(--ink-3)' }}>{d.day.slice(3)}</small>
                 </div>
               ))}
             </div>
@@ -90,10 +90,10 @@ export default function Dashboard({ onScan, onOpen }: { onScan: () => void; onOp
   );
 }
 
-function Stat({ icon, value, label, sub }: { icon: React.ReactNode; value: number; label: string; sub: string }) {
+function Stat({ icon, value, label, sub, tone = 'lime' }: { icon: React.ReactNode; value: number; label: string; sub: string; tone?: 'lime' | 'orange' | 'red' }) {
   return (
     <div className="stat">
-      <div className="stat-ic">{icon}</div>
+      <div className={`stat-ic tone-${tone}`}>{icon}</div>
       <div><b>{value}</b><span>{label} · {sub}</span></div>
     </div>
   );
