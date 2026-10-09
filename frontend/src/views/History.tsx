@@ -33,7 +33,7 @@ export default function History({ onOpen, refreshKey }: { onOpen: (id: string) =
       <Card>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ position: 'relative', flex: '1 1 220px' }}>
-            <Search size={15} style={{ position: 'absolute', left: 13, top: 13, color: '#a1a1aa' }} aria-hidden />
+            <Search size={15} style={{ position: 'absolute', left: 13, top: 13, color: 'var(--ink-3)' }} aria-hidden />
             <input className="input" style={{ paddingLeft: 36, borderRadius: 999 }} placeholder="Search employer, domain, label…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search scan history" />
           </div>
           <div className="pillrow" role="radiogroup" aria-label="Filter by risk level">

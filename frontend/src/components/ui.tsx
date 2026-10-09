@@ -5,15 +5,19 @@ import {
 } from 'lucide-react';
 
 export const sevColor: Record<string, string> = {
-  critical: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#64748b', info: '#64748b',
+  critical: 'var(--sev-crit)', high: 'var(--sev-high)', medium: 'var(--sev-med)', low: 'var(--sev-mut)', info: 'var(--sev-mut)',
 };
 export const levelColor: Record<string, string> = {
-  low: '#22c55e', caution: '#eab308', suspicious: '#f59e0b', high: '#f97316', critical: '#ef4444',
+  low: '#bef264', caution: '#fbbf24', suspicious: '#fb923c', high: '#ef4444', critical: '#dc2626',
+};
+// Lime/amber/orange badges carry dark text; red badges carry white text (accessible contrast on dark canvas).
+export const levelInk: Record<string, string> = {
+  low: '#141a05', caution: '#1c1206', suspicious: '#1c1006', high: '#ffffff', critical: '#ffffff',
 };
 export const verdictMeta: Record<string, { icon: ReactNode; color: string; label: string }> = {
   avoid: { icon: <ShieldX size={15} />, color: '#ef4444', label: 'Avoid This Listing' },
-  verify: { icon: <ShieldAlert size={15} />, color: '#f59e0b', label: 'Verify Employer' },
-  proceed: { icon: <ShieldCheck size={15} />, color: '#22c55e', label: 'Proceed Carefully' },
+  verify: { icon: <ShieldAlert size={15} />, color: '#fb923c', label: 'Verify Employer' },
+  proceed: { icon: <ShieldCheck size={15} />, color: '#bef264', label: 'Proceed Carefully' },
 };
 
 export function Card({ children, style, hover }: { children: ReactNode; style?: React.CSSProperties; hover?: boolean }) {
@@ -22,7 +26,7 @@ export function Card({ children, style, hover }: { children: ReactNode; style?: 
 
 export function RiskBadge({ level, band }: { level: string; band: string }) {
   return (
-    <span className={`badge risk-${level}`} style={{ background: levelColor[level] || '#64748b' }}>
+    <span className={`badge risk-${level}`} style={{ background: levelColor[level] || '#71717a', color: levelInk[level] || '#fafafa' }}>
       {level === 'low' ? <ShieldCheck size={14} /> : level === 'critical' || level === 'high' ? <ShieldX size={14} /> : <AlertTriangle size={14} />}
       {band}
     </span>
@@ -36,7 +40,7 @@ export function ScoreRing({ score, color }: { score: number; color: string }) {
   return (
     <div className="ring" role="img" aria-label={`Risk score ${score} out of 100`}>
       <svg width="148" height="148" viewBox="0 0 148 148">
-        <circle cx="74" cy="74" r={r} fill="none" stroke="#303039" strokeWidth="12" />
+        <circle cx="74" cy="74" r={r} fill="none" stroke="#26262c" strokeWidth="12" />
         <circle cx="74" cy="74" r={r} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round"
           strokeDasharray={`${frac * c} ${c}`} />
       </svg>
@@ -46,7 +50,7 @@ export function ScoreRing({ score, color }: { score: number; color: string }) {
 }
 
 export function StateDot({ state }: { state: 'passed' | 'failed' | 'unverified' }) {
-  const color = state === 'passed' ? '#22c55e' : state === 'failed' ? '#ef4444' : '#64748b';
+  const color = state === 'passed' ? 'var(--ok)' : state === 'failed' ? 'var(--fail)' : 'var(--mut)';
   const Icon = state === 'passed' ? CheckCircle2 : state === 'failed' ? MinusCircle : HelpCircle;
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, letterSpacing: '0.05em', color }}>
@@ -56,9 +60,9 @@ export function StateDot({ state }: { state: 'passed' | 'failed' | 'unverified' 
 }
 
 export function VerifyChip({ status }: { status: string }) {
-  const color = status === 'verified' ? '#22c55e' : status === 'mismatch' ? '#ef4444' : '#a1a1aa';
+  const color = status === 'verified' ? 'var(--ok)' : status === 'mismatch' ? 'var(--fail)' : 'var(--ink-2)';
   return (
-    <span className="tag" style={{ color, borderColor: color + '66' }}>
+    <span className="tag" style={{ color, borderColor: `color-mix(in srgb, ${color} 40%, transparent)` }}>
       {status === 'verified' ? <CheckCircle2 size={12} /> : status === 'mismatch' ? <AlertTriangle size={12} /> : <Info size={12} />}
       {status.replace(/-/g, ' ')}
     </span>
@@ -81,8 +85,9 @@ export function Skeleton({ height = 120 }: { height?: number }) {
 }
 
 export function FindingSeverity({ severity }: { severity: string }) {
+  const color = sevColor[severity] || 'var(--ink-2)';
   return (
-    <span className="tag" style={{ color: sevColor[severity] || '#a1a1aa', borderColor: (sevColor[severity] || '#666') + '66' }}>
+    <span className="tag" style={{ color, borderColor: `color-mix(in srgb, ${color} 40%, transparent)` }}>
       {severity.toUpperCase()}
     </span>
   );
