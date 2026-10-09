@@ -17,17 +17,16 @@ frontend/ (React + TS + Vite, offline-capable engine mirror)
                            empty states, skeletons, toasts (lucide-react icons)
    src/lib/history.ts      scan history in browser localStorage only
                            (full evidence for re-inspection; never uploaded)
-backend/  (Node 20 + Express, no build step)
-   src/scoring.js            weighted aggregation + overrides + risk floors
-   src/detectors/{linguistic,behavioural,urlAnalysis,technical,employer}.js
-   src/inspect.js            SSRF-guarded static-HTML fetch (no JS execution)
-   src/utils/{psl,ssrf,redact}.js
-   data/dataset.json         120-case synthetic labelled set (built by build-dataset.js)
-   tests/regression.test.js  8 behaviour-first guarantees (node:test)
+backend-java/  (Java 17, zero dependencies, no Maven needed)
+   Scoring.java              weighted aggregation + overrides + risk floors
+   detect/                   Linguistic, Behavioural, UrlAnalysis, Technical, EmployerCat
+   Inspect.java              SSRF-guarded static-HTML fetch (no JS execution)
+   Redact.java Psl.java Ssrf.java Json.java
+   Verify.java Checklist.java Plan.java   Safe Apply pipeline
+   RegressionTest.java       8 behaviour-first guarantees
 ```
 
-Detection logic is separate from UI and intel providers. External APIs are optional
-(`backend/.env.example`); core scanning works fully offline.
+Detection logic is separate from UI and intel providers. Core scanning works fully offline.
 
 ## Scoring (documented in code + UI)
 
@@ -48,18 +47,17 @@ Detection logic is separate from UI and intel providers. External APIs are optio
 ## Setup & run
 
 ```powershell
-# backend
-cd backend
-npm install
-npm test            # regression guarantees
-npm run evaluate    # synthetic metrics (see EVALUATION.md)
-npm start           # http://localhost:8787 (GET /api/health)
+# backend + UI in one step (serves the prebuilt frontend/dist too)
+cd backend-java
+.\run.bat           # http://localhost:8787 (JDK 17+, zero dependencies)
 
-# frontend (new terminal)
+# optional: regression guarantees (8 behaviour-first checks)
+java -cp out com.jobshield.RegressionTest
+
+# optional: frontend dev mode (needs npm install first; proxies /api → :8787)
 cd frontend
 npm install
-npm run dev         # http://localhost:5173 (proxies /api → backend)
-# production: npm run build; npm run preview
+npm run dev         # http://localhost:5173
 ```
 
 ## Interface (v1.2 redesign)
@@ -87,7 +85,7 @@ Every scan now returns a `safeApply` block (see `POST /api/scan`, `POST /api/mes
 - **Why unsafe**: plain-language explanation assembled from the top confirmed findings.
 - **Action plan**: contextual steps (don't pay, don't share OTPs/PINs, resolve
   domain mismatches, verify independently…), each citing the finding ids it came from.
-- **Employer verification** (`backend/src/verify.js` + `src/data/employers.json`):
+- **Employer verification** (`backend-java/src/com/jobshield/Verify.java` + `data/employers.json`):
   claimed employer/position extraction, official domain resolved **only** from the
   curated offline directory, listing-domain comparison, recruiter-email
   classification, and best-effort vacancy corroboration against the official
@@ -98,7 +96,7 @@ Every scan now returns a `safeApply` block (see `POST /api/scan`, `POST /api/mes
   severity, why-it-matters, and what-to-do per finding.
 - **Protection panel**: Aadhaar/PAN, bank/cards, OTP/PIN/passwords, documents,
   payments — each `requested` / `mentioned` / `not-detected` with contextual warnings.
-- **Checklist** (`backend/src/checklist.js`): 8 dynamic items with
+- **Checklist** (`backend-java/.../Checklist.java`): 8 dynamic items with
   passed/failed/unverified auto states + derivation refs; the UI lets users mark
   items “reviewed by you”, visually distinct from automatic evidence.
 - **Recruiter message scanner** (`POST /api/message`, text-only, same engine):
@@ -107,8 +105,7 @@ Every scan now returns a `safeApply` block (see `POST /api/scan`, `POST /api/mes
 - **Already-shared guidance**: bank-freeze steps, Aadhaar lock, credit monitoring,
   and reporting via https://cybercrime.gov.in / helpline 1930.
 
-Tests: `backend/tests/safeapply.test.js` (10 acceptance criteria) +
-`regression.test.js` (8 behaviour-first guarantees) — run `npm test`.
+Tests: `java -cp out com.jobshield.RegressionTest` (8 behaviour-first guarantees).
 
 ## Privacy
 
@@ -122,12 +119,11 @@ Tests: `backend/tests/safeapply.test.js` (10 acceptance criteria) +
 - Synthetic evaluation only — not production-ready claims for real traffic.
 - Live WHOIS/RDAP, VirusTotal, SafeBrowsing are optional hooks, not bundled.
 - Non-English coverage focuses on Hindi/Marathi/Hinglish job-scam phrasing.
-- See `EVALUATION.md` for measured results and `backend/src/*` for rule documentation.
+- See `EVALUATION.md` for measured results and `backend-java/src/*` for rule documentation.
 
 ## Updating threat-intel sources
 
-1. Append domains to `LOCAL_BLOCKLIST` in `backend/src/inspect.js`, or
-2. Set `THREAT_FEED_URLS` (newline/CSV of hosts) and extend `inspectUrl()` to fetch at
-   startup with a 10s timeout + SSRF policy from `src/utils/ssrf.js`, or
-3. Wire `VT_API_KEY` / `GS_API_KEY` lookups in `analyseTechnical()` input mapping —
+1. Append domains to `LOCAL_BLOCKLIST` in `backend-java/.../Inspect.java`, or
+2. Extend `inspectUrl()` with a 10s timeout + SSRF policy from `Ssrf.java`, or
+3. Wire `VT_API_KEY` / `GS_API_KEY` lookups in `Technical.analyse()` input mapping —
    keep them optional and timestamp + label the source in the URL-intelligence panel.
