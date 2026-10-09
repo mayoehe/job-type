@@ -1,0 +1,32 @@
+{
+  "_note": "Curated offline employer directory (heuristic aid only). Entries are hand-listed well-known employers. Absence from this list means UNKNOWN, never illegitimate. careersUrl is included only where the path is well established; otherwise null and a candidate path is probed at verification time (marked unverified until fetched).",
+  "version": "1.0.0",
+  "employers": [
+    { "names": ["infosys"], "officialDomain": "infosys.com", "careersUrl": "https://www.infosys.com/careers/", "type": "company" },
+    { "names": ["tcs", "tata consultancy services"], "officialDomain": "tcs.com", "careersUrl": "https://www.tcs.com/careers", "type": "company" },
+    { "names": ["wipro"], "officialDomain": "wipro.com", "careersUrl": "https://careers.wipro.com", "type": "company" },
+    { "names": ["hcl", "hcltech", "hcl technologies"], "officialDomain": "hcltech.com", "careersUrl": "https://www.hcltech.com/careers", "type": "company" },
+    { "names": ["tech mahindra", "techmahindra"], "officialDomain": "techmahindra.com", "careersUrl": null, "type": "company" },
+    { "names": ["accenture"], "officialDomain": "accenture.com", "careersUrl": null, "type": "company" },
+    { "names": ["cognizant"], "officialDomain": "cognizant.com", "careersUrl": null, "type": "company" },
+    { "names": ["ibm"], "officialDomain": "ibm.com", "careersUrl": null, "type": "company" },
+    { "names": ["microsoft"], "officialDomain": "microsoft.com", "careersUrl": "https://jobs.careers.microsoft.com", "type": "company" },
+    { "names": ["google"], "officialDomain": "google.com", "careersUrl": "https://www.google.com/about/careers", "type": "company" },
+    { "names": ["amazon"], "officialDomain": "amazon.jobs", "careersUrl": "https://www.amazon.jobs", "type": "company" },
+    { "names": ["flipkart"], "officialDomain": "flipkart.com", "careersUrl": null, "type": "company" },
+    { "names": ["reliance", "reliance industries"], "officialDomain": "reliance.com", "careersUrl": null, "type": "company" },
+    { "names": ["tata motors"], "officialDomain": "tatamotors.com", "careersUrl": null, "type": "company" },
+    { "names": ["tata"], "officialDomain": "tata.com", "careersUrl": null, "type": "company" },
+    { "names": ["maruti suzuki", "maruti"], "officialDomain": "marutisuzuki.com", "careersUrl": null, "type": "company" },
+    { "names": ["hdfc bank", "hdfc"], "officialDomain": "hdfcbank.com", "careersUrl": "https://www.hdfcbank.com/careers", "type": "company" },
+    { "names": ["icici bank", "icici"], "officialDomain": "icicibank.com", "careersUrl": null, "type": "company" },
+    { "names": ["state bank of india", "sbi"], "officialDomain": "sbi.co.in", "careersUrl": "https://sbi.co.in/careers", "type": "company" },
+    { "names": ["axis bank", "axis"], "officialDomain": "axisbank.com", "careersUrl": null, "type": "company" },
+    { "names": ["upsc", "union public service commission"], "officialDomain": "upsc.gov.in", "careersUrl": "https://www.upsc.gov.in", "type": "government" },
+    { "names": ["ssc", "staff selection commission"], "officialDomain": "ssc.gov.in", "careersUrl": "https://ssc.gov.in", "type": "government" },
+    { "names": ["ibps", "institute of banking personnel selection"], "officialDomain": "ibps.in", "careersUrl": "https://www.ibps.in", "type": "government" },
+    { "names": ["railway", "indian railways", "rrb"], "officialDomain": null, "careersUrl": null, "type": "government" },
+    { "names": ["isro"], "officialDomain": "isro.gov.in", "careersUrl": "https://www.isro.gov.in/Careers.html", "type": "government" }
+  ],
+  "platforms": ["linkedin.com", "naukri.com", "indeed.com", "foundit.in", "shine.com", "timesjobs.com", "apna.co", "freshersworld.com", "cutshort.io", "wellfound.com"]
+}
