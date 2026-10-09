@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Settings as SettingsIcon, Trash2, PlugZap, Eye, Info } from 'lucide-react';
-import { Card, EmptyState } from '../components/ui';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { PageHeader } from '../components/ui';
 import { listScans, clearHistory } from '../lib/history';
 
 export default function Settings() {
@@ -45,40 +49,52 @@ export default function Settings() {
 
   return (
     <div>
-      <div className="hero">
-        <div>
-          <h1><SettingsIcon size={28} style={{ verticalAlign: -5 }} /> Settings</h1>
-          <p>Connection, data and display preferences. Everything stays on this device unless you point the app at a remote backend.</p>
-        </div>
-      </div>
-      <div className="grid two">
+      <PageHeader
+        title={<span className="inline-flex items-center gap-2"><SettingsIcon size={26} className="text-primary" /> Settings</span>}
+        description="Connection, data and display preferences. Everything stays on this device unless you point the app at a remote backend."
+      />
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card>
-          <h2><PlugZap size={16} style={{ verticalAlign: -3 }} /> Backend connection</h2>
-          <p className="sub">Status: {backendOk === null ? 'checking…' : backendOk ? 'connected' : 'unreachable — offline engine in use'}</p>
-          <label className="lbl" htmlFor="apibase">API base URL (empty = same origin / dev proxy)</label>
-          <input id="apibase" className="input" placeholder="e.g. http://localhost:8787" value={apiBase} onChange={(e) => setApiBase(e.target.value)} inputMode="url" autoComplete="off" />
-          <div className="row">
-            <button className="btn primary" onClick={saveApi}>Save connection</button>
-            {saved && <span className="note" role="status">Saved — new scans use this backend.</span>}
-          </div>
-          <p className="note">Pasted listings are sent only to this backend for analysis — never to AI providers.</p>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base"><PlugZap size={16} className="text-primary" /> Backend connection</CardTitle>
+            <CardDescription>Status: {backendOk === null ? 'checking…' : backendOk ? 'connected' : 'unreachable — offline engine in use'}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="apibase">API base URL (empty = same origin / dev proxy)</Label>
+              <Input id="apibase" placeholder="e.g. http://localhost:8787" value={apiBase} onChange={(e) => setApiBase(e.target.value)} inputMode="url" autoComplete="off" />
+            </div>
+            <div className="flex items-center gap-3">
+              <Button onClick={saveApi}>Save connection</Button>
+              {saved && <span className="text-[13px] text-muted-foreground" role="status">Saved — new scans use this backend.</span>}
+            </div>
+            <p className="text-[13px] text-muted-foreground">Pasted listings are sent only to this backend for analysis — never to AI providers.</p>
+          </CardContent>
         </Card>
         <Card>
-          <h2><Eye size={16} style={{ verticalAlign: -3 }} /> Data &amp; display</h2>
-          <p className="sub">{histCount} scan(s) stored locally on this device.</p>
-          <div className="row">
-            <button className="btn ghost sm" onClick={() => { clearHistory(); setHistCount(0); }}><Trash2 size={14} /> Delete all local history</button>
-          </div>
-          <label className="note" style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12, cursor: 'pointer' }}>
-            <input type="checkbox" checked={reduceMotion} onChange={toggleMotion} style={{ width: 17, height: 17, accentColor: '#bef264' }} />
-            Reduce motion (also follows your OS setting automatically)
-          </label>
-          <p className="note" style={{ marginTop: 12, display: 'flex', gap: 6 }}><Info size={14} style={{ flexShrink: 0, marginTop: 2 }} /> The backend keeps only anonymous aggregate counts. Full scan evidence lives in your browser history until you delete it.</p>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base"><Eye size={16} className="text-primary" /> Data &amp; display</CardTitle>
+            <CardDescription>{histCount} scan(s) stored locally on this device.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Button variant="outline" size="sm" onClick={() => { clearHistory(); setHistCount(0); }}><Trash2 /> Delete all local history</Button>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-[13px] text-muted-foreground">
+              <input type="checkbox" checked={reduceMotion} onChange={toggleMotion} className="size-[17px] accent-[var(--ring)]" />
+              Reduce motion (also follows your OS setting automatically)
+            </label>
+            <p className="flex gap-1.5 text-[13px] text-muted-foreground"><Info size={14} className="mt-0.5 shrink-0" /> The backend keeps only anonymous aggregate counts. Full scan evidence lives in your browser history until you delete it.</p>
+          </CardContent>
         </Card>
       </div>
-      <Card style={{ marginTop: 16 }}>
-        <h2>About JobShield</h2>
-        <p className="note">Behaviour-first heuristic detector (v1.1) + Safe Apply Assistant. Scores 0–100 are heuristics, not calibrated probabilities. Low risk never guarantees safety. Report fraud at <a href="https://cybercrime.gov.in" target="_blank" rel="noreferrer">cybercrime.gov.in</a> or call 1930.</p>
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle className="font-serif text-xl">About JobShield</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-[13px] text-muted-foreground">Behaviour-first heuristic detector (v1.1) + Safe Apply Assistant. Scores 0–100 are heuristics, not calibrated probabilities. Low risk never guarantees safety. Report fraud at <a href="https://cybercrime.gov.in" target="_blank" rel="noreferrer" className="text-primary underline-offset-4 hover:underline">cybercrime.gov.in</a> or call 1930.</p>
+        </CardContent>
       </Card>
     </div>
   );

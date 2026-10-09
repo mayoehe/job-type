@@ -60,10 +60,12 @@ npm install
 npm run dev         # http://localhost:5173
 ```
 
-## Interface (v1.2 redesign)
+## Interface (shadcn + claymorphism)
 
-Dark analytics dashboard (`#060607` canvas, charcoal cards, lime/orange data
-accents, slim icon rail; semantic lime→orange→red risk colours). Destinations: **Dashboard** (live
+Clean shadcn-style UI on the claymorphism theme (light + dark via the sun/moon
+button in the topbar): soft large-radius cards with offset shadows, Plus Jakarta
+Sans / Lora / Roboto Mono type, icon sidebar with tooltips, and soft-tinted risk
+badges (reassuring → caution → red reserved for high/critical). Destinations: **Dashboard** (live
 stats, risk distribution, 14-day activity, recent scans — all computed from
 real local history, with empty states when none), **Scan Job** (listing +
 message tabs), **Scan History** (search, risk filters, re-open past evidence,

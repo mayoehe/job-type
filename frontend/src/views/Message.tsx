@@ -1,5 +1,10 @@
 import { MessageSquareText, Eraser, Send } from 'lucide-react';
-import { Card, ScoreRing, RiskBadge, FindingSeverity, EmptyState } from '../components/ui';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Textarea } from '../components/ui/textarea';
+import { Label } from '../components/ui/label';
+import { Badge } from '../components/ui/badge';
+import { RiskBadge, ScoreRing, FindingSeverity, EmptyState, FieldNote, sevVar, riskVar } from '../components/ui';
 import type { ScanResultFull } from '../lib/api';
 
 const CHANNELS = [
@@ -19,64 +24,105 @@ export function MessageForm({ channel, setChannel, msgText, setMsgText, loading,
   { channel: string; setChannel: (v: string) => void; msgText: string; setMsgText: (v: string) => void; loading: boolean; onScan: () => void; onClear: () => void; onSample: (s: { channel: string; text: string }) => void }) {
   return (
     <Card>
-      <h2><MessageSquareText size={17} style={{ verticalAlign: -3 }} /> Recruiter message scanner</h2>
-      <p className="sub">Same detection engine, text-only. Nothing is sent to AI services — analysis stays local.</p>
-      <label className="lbl">Message type</label>
-      <div className="pillrow" role="radiogroup" aria-label="Message type">
-        {CHANNELS.map((c) => (
-          <button key={c.id} role="radio" aria-checked={channel === c.id} className={channel === c.id ? 'pill active' : 'pill'} onClick={() => setChannel(c.id)}>{c.label}</button>
-        ))}
-      </div>
-      <label className="lbl" htmlFor="msg">Message text</label>
-      <textarea id="msg" className="textarea" placeholder="Paste the WhatsApp message, email, offer letter, invite or payment request…" value={msgText} onChange={(e) => setMsgText(e.target.value)} />
-      <div className="row">
-        <button className="btn primary" disabled={!msgText.trim() || loading} onClick={onScan} aria-busy={loading}>
-          <Send size={16} /> {loading ? 'Analysing…' : 'Analyse message'}
-        </button>
-        <button className="btn ghost" onClick={onClear}><Eraser size={16} /> Clear</button>
-      </div>
-      <label className="lbl">Samples</label>
-      <div className="pillrow">
-        {MSG_SAMPLES.map((s, i) => <button key={i} className="pill" onClick={() => onSample(s)}>{s.name}</button>)}
-      </div>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 font-serif text-xl"><MessageSquareText size={18} className="text-primary" /> Recruiter message scanner</CardTitle>
+        <CardDescription>Same detection engine, text-only. Nothing is sent to AI services — analysis stays local.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Message type</Label>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Message type">
+            {CHANNELS.map((c) => (
+              <Button
+                key={c.id} role="radio" aria-checked={channel === c.id} size="sm"
+                variant={channel === c.id ? 'default' : 'secondary'}
+                onClick={() => setChannel(c.id)}
+              >
+                {c.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="msg">Message text</Label>
+          <Textarea id="msg" placeholder="Paste the WhatsApp message, email, offer letter, invite or payment request…" value={msgText} onChange={(e) => setMsgText(e.target.value)} className="min-h-[170px]" />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button disabled={!msgText.trim() || loading} onClick={onScan} aria-busy={loading}>
+            <Send /> {loading ? 'Analysing…' : 'Analyse message'}
+          </Button>
+          <Button variant="outline" onClick={onClear}><Eraser /> Clear</Button>
+        </div>
+        <div className="space-y-2">
+          <Label>Samples</Label>
+          <div className="flex flex-wrap gap-2">
+            {MSG_SAMPLES.map((s, i) => <Button key={i} variant="secondary" size="sm" onClick={() => onSample(s)}>{s.name}</Button>)}
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
 }
 
 export function MessageResult({ result }: { result: ScanResultFull }) {
   const sa = result.safeApply;
+  const levelColor = riskVar[result.level] || result.color;
   return (
-    <Card style={{ borderColor: result.color }}>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <h2>Message analysis</h2>
-        <span className="tag">{sa?.channel || 'message'}</span>
-        <RiskBadge level={result.level} band={result.band} />
-      </div>
-      <div className="score-hero" style={{ marginTop: 12 }}>
-        <ScoreRing score={result.score} color={result.color} />
-        <p style={{ flex: 1, minWidth: 220 }}>{sa?.whyUnsafe}</p>
-      </div>
-      {result.overrides.map((o) => (
-        <div className="alert crit" key={o.id}><b>⚠ {o.title}</b><div className="note">{o.detail}</div></div>
-      ))}
-      {sa?.recommendedResponse && (
-        <>
-          <h3 style={{ marginTop: 12 }}>Recommended response</h3>
-          <div className="finding" style={{ borderLeftColor: '#bef264' }}><div>{sa.recommendedResponse}</div></div>
-        </>
-      )}
-      <h3 style={{ marginTop: 12 }}>Next steps</h3>
-      <ol className="steps">{(sa?.steps || []).map((s, i) => <li key={i} className={s.priority === 'urgent' ? 'urgent' : ''}><b>{s.title}</b><div className="note">{s.detail}</div></li>)}</ol>
-      <h3 style={{ marginTop: 12 }}>Evidence</h3>
-      {result.allFindings.filter((f) => f.severity !== 'info').length === 0 && (
-        <EmptyState title="No significant flags" body="Stay cautious and verify the sender through official channels." />
-      )}
-      {result.allFindings.filter((f) => f.severity !== 'info').map((f) => (
-        <div className="finding" key={f.id} style={{ borderLeftColor: f.severity === 'critical' ? '#ef4444' : f.severity === 'high' ? '#f87171' : '#fb923c' }}>
-          <FindingSeverity severity={f.severity} /> <b>{f.title}</b>
-          <div className="ev">{f.evidence}</div>
+    <Card style={{ borderColor: `color-mix(in srgb, ${levelColor} 55%, transparent)` }}>
+      <CardHeader>
+        <div className="flex flex-wrap items-center gap-2">
+          <CardTitle className="font-serif text-xl">Message analysis</CardTitle>
+          <Badge variant="secondary">{sa?.channel || 'message'}</Badge>
+          <RiskBadge level={result.level} band={result.band} />
         </div>
-      ))}
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap items-center gap-5">
+          <ScoreRing score={result.score} color={levelColor} />
+          <p className="min-w-[220px] flex-1 text-sm">{sa?.whyUnsafe}</p>
+        </div>
+        {result.overrides.map((o) => (
+          <div key={o.id} className="rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm shadow-xs">
+            <b>⚠ {o.title}</b>
+            <FieldNote>{o.detail}</FieldNote>
+          </div>
+        ))}
+        {sa?.recommendedResponse && (
+          <div>
+            <h3 className="mb-2 text-sm font-semibold">Recommended response</h3>
+            <div className="rounded-xl border bg-background px-4 py-3 text-sm shadow-xs" style={{ borderLeft: '3px solid var(--primary)' }}>
+              {sa.recommendedResponse}
+            </div>
+          </div>
+        )}
+        <div>
+          <h3 className="mb-2 text-sm font-semibold">Next steps</h3>
+          <ol className="list-decimal space-y-2.5 pl-5 text-sm">
+            {(sa?.steps || []).map((s, i) => (
+              <li key={i} className={s.priority === 'urgent' ? 'rounded-r-lg border-l-[3px] border-destructive pl-2.5' : ''}>
+                <b>{s.title}</b>
+                <FieldNote>{s.detail}</FieldNote>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div>
+          <h3 className="mb-2 text-sm font-semibold">Evidence</h3>
+          {result.allFindings.filter((f) => f.severity !== 'info').length === 0 && (
+            <EmptyState title="No significant flags" body="Stay cautious and verify the sender through official channels." />
+          )}
+          <div className="space-y-2">
+            {result.allFindings.filter((f) => f.severity !== 'info').map((f) => (
+              <div key={f.id} className="rounded-xl border bg-background px-4 py-3 shadow-xs" style={{ borderLeft: `3px solid ${sevVar[f.severity] || 'var(--muted-foreground)'}` }}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <FindingSeverity severity={f.severity} /> <b className="text-[13.5px]">{f.title}</b>
+                </div>
+                <div className="mt-2 whitespace-pre-wrap rounded-md border border-dashed bg-card px-3 py-2 font-mono text-xs text-muted-foreground">{f.evidence}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
 }

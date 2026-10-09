@@ -59,22 +59,21 @@
 
     <details id="help">
       <summary>Servers are down? Start them ⬇</summary>
-      <p><b>Option A — single server (recommended):</b> serves the built UI + API on one port. Keep <b>one</b> terminal open, then press Recheck.</p>
-      <pre>cd /d "%USERPROFILE%\OneDrive\Documents\GitHub\job-type\backend"
-npm install
-npm start</pre>
+      <p><b>Option A — single server (recommended):</b> serves the built UI + API on one port. Needs <b>JDK 17+</b> (no Node, no Maven). Keep <b>one</b> terminal open, then press Recheck.</p>
+      <pre>cd /d "%USERPROFILE%\OneDrive\Documents\GitHub\job-type\backend-java"
+.\run.bat</pre>
       <p>Then open <b>http://localhost:8787</b></p>
       <p><b>Option B — dev mode (two terminals):</b> live-reload frontend + backend separately.</p>
-      <p><b>1 — Backend:</b></p>
-      <pre>cd /d "%USERPROFILE%\OneDrive\Documents\GitHub\job-type\backend"
-npm install
-npm start</pre>
+      <p><b>1 — Backend (Java):</b></p>
+      <pre>cd /d "%USERPROFILE%\OneDrive\Documents\GitHub\job-type\backend-java"
+.\run.bat</pre>
       <p><b>2 — Frontend:</b></p>
       <pre>cd /d "%USERPROFILE%\OneDrive\Documents\GitHub\job-type\frontend"
 npm install
 npm run dev</pre>
       <p>Then open <b>http://localhost:5173</b> (proxies /api → backend).</p>
-      <p>If the single-port UI looks stale, rebuild it: <b>cd frontend</b>, <b>npm run build</b>, restart the backend.</p>
+      <p>If the single-port UI looks stale, rebuild it: <b>cd frontend</b>, <b>npm run build</b>, then restart the backend (<b>.\run.bat</b> again).</p>
+      <p>To verify the backend: <b>cd backend-java</b>, <b>java -cp out com.jobshield.RegressionTest</b> (8/8 checks).</p>
       <p>No login needed. Paste a job listing or recruiter message to scan. Reporting fraud: <b>https://cybercrime.gov.in</b> / <b>1930</b>.</p>
     </details>
   </div>

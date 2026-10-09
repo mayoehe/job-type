@@ -1,8 +1,10 @@
 import { ScanLine, ShieldX, AlertOctagon, UserSearch, ArrowRight, Activity, PieChart, Clock } from 'lucide-react';
-import { Card, RiskBadge } from '../components/ui';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { RiskBadge, PageHeader, riskVar } from '../components/ui';
 import { historyStats, listScans, type HistoryEntry } from '../lib/history';
 
-const levelColor: Record<string, string> = { low: '#bef264', caution: '#fbbf24', suspicious: '#fb923c', high: '#ef4444', critical: '#dc2626' };
+const LEVELS = ['critical', 'high', 'suspicious', 'caution', 'low'] as const;
 
 export default function Dashboard({ onScan, onOpen }: { onScan: () => void; onOpen: (id: string) => void }) {
   const stats = historyStats();
@@ -12,89 +14,125 @@ export default function Dashboard({ onScan, onOpen }: { onScan: () => void; onOp
 
   return (
     <div>
-      <div className="hero">
-        <div>
-          <h1>Threat overview</h1>
-          <p>JobShield scans job listings and recruiter messages for phishing behaviour — fee demands, credential harvesting and impersonation — and turns findings into a Safe Apply action plan.</p>
-        </div>
-        <div className="hero-actions">
-          <button className="btn primary" onClick={onScan}><ScanLine size={16} /> Scan a Job</button>
-        </div>
+      <PageHeader
+        title="Threat overview"
+        description="JobShield scans job listings and recruiter messages for phishing behaviour — fee demands, credential harvesting and impersonation — and turns findings into a Safe Apply action plan."
+        actions={<Button onClick={onScan}><ScanLine /> Scan a Job</Button>}
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={<Activity size={20} />} tone="var(--chart-1)" value={stats.total} label="Jobs scanned" sub="on this device" />
+        <StatCard icon={<ShieldX size={20} />} tone="var(--risk-high)" value={stats.highRisk} label="High-risk listings" sub="high + critical" />
+        <StatCard icon={<AlertOctagon size={20} />} tone="var(--risk-critical)" value={stats.critical} label="Critical warnings" sub="immediate danger" />
+        <StatCard icon={<UserSearch size={20} />} tone="var(--risk-caution)" value={stats.needVerify} label="Need verification" sub="verify employer" />
       </div>
 
-      <div className="grid four">
-        <Card><Stat icon={<Activity size={20} />} tone="lime" value={stats.total} label="Jobs scanned" sub="this device" /></Card>
-        <Card><Stat icon={<ShieldX size={20} />} tone="red" value={stats.highRisk} label="High-risk listings" sub="high + critical" /></Card>
-        <Card><Stat icon={<AlertOctagon size={20} />} tone="red" value={stats.critical} label="Critical warnings" sub="immediate danger" /></Card>
-        <Card><Stat icon={<UserSearch size={20} />} tone="orange" value={stats.needVerify} label="Need verification" sub="verify employer" /></Card>
-      </div>
-
-      <div className="grid two" style={{ marginTop: 16 }}>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card>
-          <h2><PieChart size={16} style={{ verticalAlign: -3 }} /> Risk distribution</h2>
-          <p className="sub">Real scans from this device — never sample data.</p>
-          {stats.total === 0 ? (
-            <p className="note" style={{ marginTop: 12 }}>No scans yet. Scan your first listing to populate this chart.</p>
-          ) : (
-            <div className="bars">
-              {(['critical', 'high', 'suspicious', 'caution', 'low'] as const).map((l) => (
-                <div className="barrow" key={l}>
-                  <span style={{ textTransform: 'capitalize' }}>{l}</span>
-                  <div className="track"><div className="fill" style={{ width: `${(stats.byLevel[l] / maxLevel) * 100}%`, background: levelColor[l] }} /></div>
-                  <span style={{ textAlign: 'right', fontWeight: 800 }}>{stats.byLevel[l]}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-        <Card>
-          <h2><Clock size={16} style={{ verticalAlign: -3 }} /> Scan activity · last 14 days</h2>
-          <p className="sub">Bars show genuine scan counts per day.</p>
-          {stats.total === 0 ? (
-            <p className="note" style={{ marginTop: 12 }}>Nothing to show yet.</p>
-          ) : (
-            <div className="activity" style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 120, marginTop: 14 }} role="img" aria-label="Scan activity chart">
-              {stats.last14.map((d) => (
-                <div key={d.day} title={`${d.day}: ${d.count} scan(s)`} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, minWidth: 0 }}>
-                  <div style={{ width: '100%', height: 88, display: 'flex', alignItems: 'flex-end' }}>
-                    <div style={{ width: '100%', height: `${Math.max(d.count > 0 ? 10 : 3, (d.count / maxDay) * 88)}px`, borderRadius: 999, background: d.count > 0 ? 'linear-gradient(180deg,#d4f88a,#a3e635)' : '#2a2a30' }} />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base"><PieChart size={16} className="text-primary" /> Risk distribution</CardTitle>
+            <CardDescription>Real scans from this device — never sample data.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {stats.total === 0 ? (
+              <p className="text-sm text-muted-foreground">No scans yet. Scan your first listing to populate this chart.</p>
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {LEVELS.map((l) => (
+                  <div key={l} className="grid grid-cols-[96px_1fr_40px] items-center gap-2.5 text-[13px]">
+                    <span className="capitalize text-muted-foreground">{l}</span>
+                    <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${(stats.byLevel[l] / maxLevel) * 100}%`, background: riskVar[l] }}
+                      />
+                    </div>
+                    <span className="text-right font-bold tabular-nums">{stats.byLevel[l]}</span>
                   </div>
-                  <small style={{ fontSize: 10, color: 'var(--ink-3)' }}>{d.day.slice(3)}</small>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base"><Clock size={16} className="text-primary" /> Scan activity</CardTitle>
+            <CardDescription>Genuine scan counts per day · last 14 days.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {stats.total === 0 ? (
+              <p className="text-sm text-muted-foreground">Nothing to show yet.</p>
+            ) : (
+              <div className="flex h-[120px] items-end gap-1.5" role="img" aria-label="Scan activity chart">
+                {stats.last14.map((d) => (
+                  <div key={d.day} title={`${d.day}: ${d.count} scan(s)`} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+                    <div className="flex h-[88px] w-full items-end">
+                      <div
+                        className="w-full rounded-full"
+                        style={{
+                          height: `${Math.max(d.count > 0 ? 10 : 3, (d.count / maxDay) * 88)}px`,
+                          background: d.count > 0 ? 'linear-gradient(180deg, var(--chart-1), var(--chart-2))' : 'var(--muted)',
+                        }}
+                      />
+                    </div>
+                    <small className="text-[10px] text-muted-foreground">{d.day.slice(3)}</small>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
         </Card>
       </div>
 
-      <Card style={{ marginTop: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <h2>Recent scans</h2>
-          {recent.length > 0 && <span className="note">{recent.length} of {stats.total} shown</span>}
-        </div>
-        {recent.length === 0 ? (
-          <p className="note" style={{ marginTop: 10 }}>No scan history on this device. <button className="btn sm" onClick={onScan} style={{ marginLeft: 6 }}>Scan your first job <ArrowRight size={14} /></button></p>
-        ) : (
-          <div className="hist-list" style={{ marginTop: 12 }}>
-            {recent.map((e: HistoryEntry) => (
-              <button key={e.id} className="hist-row" onClick={() => onOpen(e.id)}>
-                <span className="t">{e.label}</span>
-                <RiskBadge level={e.level} band={`${e.score} · ${e.band}`} />
-                <span className="m">{new Date(e.at).toLocaleString()} · {e.kind === 'message' ? 'message' : e.sub}</span>
-              </button>
-            ))}
-          </div>
-        )}
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle className="text-base">Recent scans</CardTitle>
+          {recent.length > 0 && <CardDescription>{recent.length} of {stats.total} shown</CardDescription>}
+        </CardHeader>
+        <CardContent>
+          {recent.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No scan history on this device.{' '}
+              <Button variant="link" className="h-auto p-0 text-sm" onClick={onScan}>
+                Scan your first job <ArrowRight />
+              </Button>
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {recent.map((e: HistoryEntry) => (
+                <button
+                  key={e.id}
+                  onClick={() => onOpen(e.id)}
+                  className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 rounded-xl border bg-background p-3 text-left shadow-xs transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span className="truncate text-sm font-semibold">{e.label}</span>
+                  <RiskBadge level={e.level} band={`${e.score} · ${e.band}`} />
+                  <span className="text-xs text-muted-foreground">{new Date(e.at).toLocaleString()} · {e.kind === 'message' ? 'message' : e.sub}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </CardContent>
       </Card>
     </div>
   );
 }
 
-function Stat({ icon, value, label, sub, tone = 'lime' }: { icon: React.ReactNode; value: number; label: string; sub: string; tone?: 'lime' | 'orange' | 'red' }) {
+function StatCard({ icon, value, label, sub, tone }: { icon: React.ReactNode; value: number; label: string; sub: string; tone: string }) {
   return (
-    <div className="stat">
-      <div className={`stat-ic tone-${tone}`}>{icon}</div>
-      <div><b>{value}</b><span>{label} · {sub}</span></div>
-    </div>
+    <Card>
+      <CardContent className="flex items-center gap-3.5 p-5">
+        <div
+          className="grid size-11 shrink-0 place-items-center rounded-xl border shadow-xs"
+          style={{ color: tone, borderColor: `color-mix(in srgb, ${tone} 40%, transparent)`, background: `color-mix(in srgb, ${tone} 10%, transparent)` }}
+        >
+          {icon}
+        </div>
+        <div>
+          <div className="font-serif text-3xl font-bold leading-none tracking-tight tabular-nums">{value}</div>
+          <div className="mt-1 text-xs font-medium text-muted-foreground">{label} · {sub}</div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
